@@ -1,3 +1,11 @@
+
+# No eclipse stuff
+.project
+.pydevproject
+
+
+## Below are the github defaults for Python projects
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
