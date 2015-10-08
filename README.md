@@ -1,2 +1,2 @@
-# ROSbag2SciPy
-Python tools to convert ROS bag files into numpy arrays / pytables
+# ros2scipy
+Python tools to convert ROS messages and bag files into numpy arrays / pytables
