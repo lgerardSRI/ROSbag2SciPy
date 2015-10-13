@@ -45,12 +45,12 @@ basic_types_parsers = {
     # message strings are already ASCI, no conversion needed
     # TODO: since we do not provide a size, it is expected to be 0 so every string will be empty
     'string'  : Parser_desc(basic_types_parsing_function, np.str),
-    'time'    : Parser_desc(time_parsing_function, np.dtype('datetime64[ns]')),
-    'duration': Parser_desc(duration_types_parsing_function, np.dtype('timedelta64[ns]')),
+    'time'    : Parser_desc(time_parsing_function, np.uint64),
+    'duration': Parser_desc(duration_types_parsing_function, np.int64),
     # deprecated but still used:
     'char'    : Parser_desc(basic_types_parsing_function, np.uint8),
     'byte'    : Parser_desc(basic_types_parsing_function, np.uint8),
-    
+
 }
 
 
@@ -64,14 +64,14 @@ def _generic_fixed_size_array_parser(base_parser_desc, array_size):
 
 def add_generic_parser(msg_typename, parsers):
     """ Adds a generic parser for msg_typename in the parsers dictionnary.
-    @param parsers: 
+    @param parsers:
     The parsers dictionnary is expected to have entries of type Parser_desc.
     @attention:
     Any msg_typename of subfield ((recursively) which isn't in parsers
     will get a generic parser and it'll be added in parsers.
     So that custom parsers will be used for subfields only if they are defined in parsers *before*
     generating custom parsers.
-    @return: the entry added in parsers for msg_typename 
+    @return: the entry added in parsers for msg_typename
     """
 
     # First check if the parser is already defined
@@ -89,10 +89,10 @@ def add_generic_parser(msg_typename, parsers):
         else:
             raise ValueError("Trying to parse message type {} which is not in the environment\n"
                              "You probably need to source the correct ROS setup.bash".format(msg_typename))
-    
+
     fdtypes = []
     fparsers = []
-    
+
     for (field, ros_type) in zip(c.__slots__, c._slot_types):
         (rbtype, is_array, array_size) = parse_type(ros_type)
         fparser_desc = add_generic_parser(rbtype, parsers)
@@ -111,7 +111,7 @@ def add_generic_parser(msg_typename, parsers):
     # TODO backport this in the genpy functions to have a fully numpy deserialization method.
     def parser(msg):
         return tuple(p(getattr(msg, f)) for (f, p) in fparsers)
-    
+
     msg_dtype = np.dtype(fdtypes)
     parsers[msg_typename] = Parser_desc(parser, msg_dtype)
     return Parser_desc(parser, msg_dtype)
@@ -121,12 +121,12 @@ Topic_dataset = namedtuple("topic_dataset", ["index", "data"])
 
 def parse_bag(bag, topic_filter=None, custom_parsers={}, basic_types_parsers=basic_types_parsers):
     tts = bag.get_type_and_topic_info()
-    
+
     topics = set(tts.topics.keys())
     # Compute the intersection between the bag's topics and the topic_filter
     if topic_filter:
         topics -= set(topic_filter)
-    
+
     dataset = dict()
     msgparsers = dict()
     msgidx = dict()
@@ -138,7 +138,7 @@ def parse_bag(bag, topic_filter=None, custom_parsers={}, basic_types_parsers=bas
     for t in topics:
         size = tts.topics[t].message_count
         (parser, ddtype) = add_generic_parser(tts.topics[t].msg_type, parsers)
-        dtype = np.dtype([('index', 'datetime64[ns]'), ('data', ddtype)])
+        dtype = np.dtype([('index', np.uint64), ('data', ddtype)])
         dataset[t] = np.empty(size, dtype=dtype)
         msgparsers[t] = parser
         msgidx[t] = 0
