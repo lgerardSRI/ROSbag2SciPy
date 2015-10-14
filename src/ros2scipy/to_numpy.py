@@ -43,8 +43,8 @@ basic_types_parsers = {
     'float32' : Parser_desc(basic_types_parsing_function, np.float32),
     'float64' : Parser_desc(basic_types_parsing_function, np.float64),
     # message strings are already ASCI, no conversion needed
-    # TODO: since we do not provide a size, it is expected to be 0 so every string will be empty
-    'string'  : Parser_desc(basic_types_parsing_function, np.str),
+    # TODO: document: default size to 80
+    'string'  : Parser_desc(basic_types_parsing_function, np.dtype('S80')),
     'time'    : Parser_desc(time_parsing_function, np.uint64),
     'duration': Parser_desc(duration_types_parsing_function, np.int64),
     # deprecated but still used:
