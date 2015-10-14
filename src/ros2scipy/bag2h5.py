@@ -6,8 +6,8 @@ Created on Oct 12, 2015
 import importlib
 
 from pathlib import Path
+import h5py
 import rosbag
-import tables
 
 from ros2scipy.to_numpy import parse_bag
 
@@ -32,7 +32,7 @@ def split_base_and_head(root, rel_path):
     path = root + rpath
     return path.rsplit('/', 1)
 
-def bag2tbl(bag_path, table_path, table_root='/', topic_filter=None, custom_parser_module=None, title=""):
+def bag2h5(bag_path, db_path, table_root='/', topic_filter=None, custom_parser_module=None):
     """
     @param custom_parser_module: The name of a module containing a custom_parsers variable providing custom parsers.
     """
@@ -44,10 +44,11 @@ def bag2tbl(bag_path, table_path, table_root='/', topic_filter=None, custom_pars
         cp = {}
 
     bag_path = Path(bag_path)
-    table_path = Path(table_path)
+    if not bag_path.exists():
+        raise ValueError("The bag {} doesn't exists.".format(bag_path))
 
     # Open the database
-    db = tables.open_file(str(table_path), mode='a', title=title)
+    db = h5py.File(str(db_path), 'a')
 
     # Load the data
     bag = rosbag.Bag(str(bag_path))
@@ -57,16 +58,17 @@ def bag2tbl(bag_path, table_path, table_root='/', topic_filter=None, custom_pars
 
     for (topic, data) in dataset.items():
         base, t = split_base_and_head(cwg, topic)
-        db.create_table(base, t, createparents=True, obj=data)
+        g = db.require_group(base)
+        g.create_dataset(t, data=data)
 
     db.close()
 
 
-def folder2tbl(folder, **kargs):
+def folder2h5(folder, **kargs):
     """
     Look for all .bag files in folder and call bag2tbl with the rest of the arguments on each one.
     """
     d = Path(folder)
     table = d.with_suffix('.h5')
     for bag in d.glob('*.bag'):
-        bag2tbl(bag, table, **kargs)
+        bag2h5(bag, table, **kargs)
