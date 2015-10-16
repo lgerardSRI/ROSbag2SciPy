@@ -87,8 +87,8 @@ def add_generic_parser(msg_typename, parsers):
             parsers[msg_typename] = bpd
             return bpd
         else:
-            raise ValueError("Trying to parse message type {} which is not in the environment\n"
-                             "You probably need to source the correct ROS setup.bash".format(msg_typename))
+            raise ValueError("Trying to parse message type {} which is not in the environment."
+                             " You probably need to source the correct ROS setup.bash".format(msg_typename))
 
     fdtypes = []
     fparsers = []
@@ -106,7 +106,6 @@ def add_generic_parser(msg_typename, parsers):
         else:
             fparsers.append((field, fparser_desc.parser))
             fdtypes.append((field, fparser_desc.dtype))
-    # TODO jit this with numba ?
     # TODO do actual raw parsing ?
     # TODO backport this in the genpy functions to have a fully numpy deserialization method.
     def parser(msg):
@@ -137,7 +136,10 @@ def parse_bag(bag, topic_filter=None, custom_parsers={}, basic_types_parsers=bas
     # Prepare the arrays
     for t in topics:
         size = tts.topics[t].message_count
-        (parser, ddtype) = add_generic_parser(tts.topics[t].msg_type, parsers)
+        try:
+            (parser, ddtype) = add_generic_parser(tts.topics[t].msg_type, parsers)
+        except ValueError as e:
+            raise ValueError("Cannot setup parser for topic {}: {}".format(t, e))
         dtype = np.dtype([('index', np.uint64), ('data', ddtype)])
         dataset[t] = np.empty(size, dtype=dtype)
         msgparsers[t] = parser

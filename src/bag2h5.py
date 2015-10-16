@@ -24,7 +24,6 @@ __version__ = 0.1
 __date__ = '2015-10-15'
 __updated__ = '2015-10-15'
 
-DEBUG = 1
 
 def main():
 
@@ -58,7 +57,7 @@ def main():
 
         # logging facility
         if args.verbose <= 0:
-            logging.root.setLevel(logging.ERROR)
+            logging.root.setLevel(logging.WARNING)
         elif args.verbose == 1:
             logging.root.setLevel(logging.INFO)
         else:
@@ -84,8 +83,6 @@ def main():
         return 1
 
     except Exception as e:
-        if DEBUG:
-            raise(e)
         logging.exception("Internal error")
         return 2
 

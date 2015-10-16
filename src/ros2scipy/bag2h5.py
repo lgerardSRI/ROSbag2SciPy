@@ -3,7 +3,7 @@ Created on Oct 12, 2015
 
 @author: lgerard
 '''
-from logging import error, warning, debug, info
+from logging import error, warning, info, debug
 import importlib
 
 from pathlib import Path
@@ -59,29 +59,32 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
     if not bag_path.exists():
         raise ValueError("The bag {} doesn't exists.".format(bag_path))
 
-    # Open the database
-    db = h5py.File(str(db_path), 'a')
-
     # Load the data
-    bag = rosbag.Bag(str(bag_path))
-    dataset = parse_bag(bag, topic_filter=topic_filter, custom_parsers=cp)
+    try:
+        bag = rosbag.Bag(str(bag_path))
+        dataset = parse_bag(bag, topic_filter=topic_filter, custom_parsers=cp)
+    except Exception as e:
+        debug("Raised error while parsing bag %s", bag_path, exc_info=True)
+        warning(str(e))
+        warning("Skipping bag %s", bag_path)
+        return
 
-    cwg = db_root.rstrip('/') + '/' + bag_path.stem
-    if db.get(cwg, False):
-        warning("A group corresponding to {} already exists."
-                " Only new dataset entries will be added.\n"
-                "Most probably this means that you have two bag files with the same name."
-                .format(bag_path))
+    # Open the database
+    with h5py.File(str(db_path), 'a') as db:
+        cwg = db_root.rstrip('/') + '/' + bag_path.stem
+        if db.get(cwg, False):
+            warning("A group corresponding to {} already exists."
+                    " Only new dataset entries will be added."
+                    " Most probably this means that you have two bag files with the same name."
+                    .format(bag_path))
 
-    for (topic, data) in dataset.items():
-        base, t = split_base_and_head(cwg, topic)
-        g = db.require_group(base)
-        if t in g:
-            warning("The dataset {} already exists in {}, skipping it.".format(t, g))
-        else:
-            g.create_dataset(t, data=data)
-
-    db.close()
+        for (topic, data) in dataset.items():
+            base, t = split_base_and_head(cwg, topic)
+            g = db.require_group(base)
+            if t in g:
+                warning("The dataset {} already exists in {}, skipping it.".format(t, g))
+            else:
+                g.create_dataset(t, data=data)
 
 
 def folder2h5(folder, db, recursive=False, **kargs):
@@ -133,7 +136,7 @@ def checkfolder2h5(folder, db, recursive=False, **kargs):
             checkh5bag(bag, db, **kargs)
             info("{} is ok.".format(bag))
         except ValueError as e:
-            error("{} is bad: {}".format(bag, e.msg))
+            error("{} is bad: {}".format(bag, e))
 
 
 
