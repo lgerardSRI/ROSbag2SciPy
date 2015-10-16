@@ -42,13 +42,14 @@ def main():
     try:
         # Setup argument parser
         parser = ArgumentParser(description=program_license, formatter_class=RawDescriptionHelpFormatter)
-        parser.add_argument("-r", "--recursive", action="store_true", help="recurse into subfolders [default: %(default)s]")
+        parser.add_argument("-r", "--recursive", action="store_true", help="Recurse into subfolders [default: %(default)s]")
         parser.add_argument("--db_root", default="/", help="The group to be considered as root for new datasets [default: %(default)s]")
         parser.add_argument("--topic_filter", nargs='*', default=["/rosout", "/rosout_agg"], help="The topics to discard in the process [default: %(default)s]")
-        parser.add_argument("-v", "--verbose", action="count", help="set verbosity level [default: %(default)s]")
+        parser.add_argument("-v", "--verbose", action="count", help="Set verbosity level [default: %(default)s]")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument('-o', '--output', default="bags.h5", help="HDF5 file to create/append the bag datasets [default: %(default)s]")
-        parser.add_argument('-cpm', '--custom_parser_modules', action='append', default=[], help="Python modules from which to load custom_parsers. They need to be on the pythonpath.")
+        parser.add_argument('-cpm', '--custom_parser_modules', action='append', default=[], help="Python module from which to load custom_parsers (it needs to be on the python path)")
+        parser.add_argument('-co', '--check_only', help="Check that the bags are in the database, only number of messages and topic names are checked, no data integrity check)")
         parser.add_argument(dest="bags", nargs='+', help="bag files or folders to convert")
 
         # Process arguments
