@@ -62,14 +62,13 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
     bag = rosbag.Bag(str(bag_path))
     dataset = parse_bag(bag, topic_filter=topic_filter, custom_parsers=cp)
 
-    cwg = '/' + db_root.strip('/') + '/' + bag_path.stem
+    cwg = db_root.rstrip('/') + '/' + bag_path.stem
 
     for (topic, data) in dataset.items():
         base, t = split_base_and_head(cwg, topic)
         g = db.require_group(base)
-        debug("Creating the dataset for {} of {}".format(t, bag))
         if t in g:
-            warning("The dataset  already exists in group {}, skipping it.".format(t, g))
+            warning("The dataset {} already exists in group {}, skipping it.".format(t, g))
         else:
             g.create_dataset(t, data=data)
 

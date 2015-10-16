@@ -70,7 +70,7 @@ def main(argv=None): # IGNORE:C0111
         parser.add_argument("-v", "--verbose", action="count", help="set verbosity level [default: %(default)s]")
         parser.add_argument('-V', '--version', action='version', version=program_version_message)
         parser.add_argument('-o', '--output', default="bags.h5", help="HDF5 file to create/append the bag datasets [default: %(default)s]")
-        parser.add_argument('-cpm', '--custom_parser_modules', nargs='*', default=[], help="Python modules from which to load custom_parsers. They need to be on the pythonpath.")
+        parser.add_argument('-cpm', '--custom_parser_modules', action='append', default=[], help="Python modules from which to load custom_parsers. They need to be on the pythonpath.")
         parser.add_argument(dest="bags", nargs='+', help="bag files or folders to convert")
 
         # Process arguments
