@@ -12,12 +12,12 @@ bag2h5 -- Transform ROS bags into HDF5
 
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
-from logging import info, debug, warning, error
 import logging
 import os
 import sys
 
 from pathlib import Path
+import colorlog
 
 from ros2scipy.bag2h5 import folder2h5, bag2h5, checkfolder2h5, checkh5bag
 
@@ -86,6 +86,7 @@ def main(argv=None): # IGNORE:C0111
             logging.root.setLevel(logging.DEBUG)
         else:
             logging.root.setLevel(logging.INFO)
+        colorlog.basicConfig(format="%(log_color)s%(levelname)s%(reset)s:%(message)s")
 
         db = args.output
 
@@ -102,13 +103,13 @@ def main(argv=None): # IGNORE:C0111
         return 0
 
     except KeyboardInterrupt:
-        error("User interrupted while ...") # TODO: actually gather what we were doing
+        logging.error("User interrupted while ...") # TODO: actually gather what we were doing
         return 1
 
     except Exception as e:
         if DEBUG or TESTRUN:
             raise(e)
-        logging.exception("Internal error:", e) # TODO: check what it does...
+        logging.exception("Internal error") # TODO: check what it does...
         return 2
 
 if __name__ == "__main__":

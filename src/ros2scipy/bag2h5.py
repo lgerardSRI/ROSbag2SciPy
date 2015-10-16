@@ -45,6 +45,10 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
     @param custom_parser_module: The name of a module containing
     a custom_parsers variable providing custom parsers.
     """
+
+    info("Putting %s in %s with db_root=%s, topic_filter=%s, cpms=%s",
+         bag_path, db_path, db_root, topic_filter, custom_parser_modules)
+
     # Load the custom parsers
     cp = {}
     for cpm in custom_parser_modules:
@@ -68,7 +72,7 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
         base, t = split_base_and_head(cwg, topic)
         g = db.require_group(base)
         if t in g:
-            warning("The dataset {} already exists in group {}, skipping it.".format(t, g))
+            warning("The dataset {} already exists in {}, skipping it.".format(t, g))
         else:
             g.create_dataset(t, data=data)
 
