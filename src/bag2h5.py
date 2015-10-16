@@ -59,11 +59,9 @@ def main():
         if args.verbose <= 0:
             logging.root.setLevel(logging.ERROR)
         elif args.verbose == 1:
-            logging.root.setLevel(logging.WARNING)
-        elif args.verbose == 2:
-            logging.root.setLevel(logging.DEBUG)
-        else:
             logging.root.setLevel(logging.INFO)
+        else:
+            logging.root.setLevel(logging.DEBUG)
         colorlog.basicConfig(format="%(log_color)s%(levelname)s%(reset)s:%(message)s")
 
         db = args.output
