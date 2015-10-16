@@ -13,7 +13,6 @@ bag2h5 -- Transform ROS bags into HDF5
 from argparse import ArgumentParser
 from argparse import RawDescriptionHelpFormatter
 import logging
-import os
 import sys
 
 from pathlib import Path
@@ -21,35 +20,14 @@ import colorlog
 
 from ros2scipy.bag2h5 import folder2h5, bag2h5, checkfolder2h5, checkh5bag
 
-
-__all__ = []
 __version__ = 0.1
 __date__ = '2015-10-15'
 __updated__ = '2015-10-15'
 
 DEBUG = 1
-TESTRUN = 0
-PROFILE = 0
 
-class CLIError(Exception):
-    '''Generic exception to raise and log different fatal errors.'''
-    def __init__(self, msg):
-        super(CLIError).__init__(type(self))
-        self.msg = "E: %s" % msg
-    def __str__(self):
-        return self.msg
-    def __unicode__(self):
-        return self.msg
+def main():
 
-def main(argv=None): # IGNORE:C0111
-    '''Command line options.'''
-
-    if argv is None:
-        argv = sys.argv
-    else:
-        sys.argv.extend(argv)
-
-    program_name = os.path.basename(sys.argv[0])
     program_version = "v%s" % __version__
     program_build_date = str(__updated__)
     program_version_message = '%%(prog)s %s (%s)' % (program_version, program_build_date)
@@ -107,28 +85,10 @@ def main(argv=None): # IGNORE:C0111
         return 1
 
     except Exception as e:
-        if DEBUG or TESTRUN:
+        if DEBUG:
             raise(e)
-        logging.exception("Internal error") # TODO: check what it does...
+        logging.exception("Internal error")
         return 2
 
 if __name__ == "__main__":
-    if DEBUG:
-        sys.argv.append("-h")
-        sys.argv.append("-v")
-        sys.argv.append("-r")
-    if TESTRUN:
-        import doctest
-        doctest.testmod()
-    if PROFILE:
-        import cProfile
-        import pstats
-        profile_filename = 'bag2h5_profile.txt'
-        cProfile.run('main()', profile_filename)
-        statsfile = open("profile_stats.txt", "wb")
-        p = pstats.Stats(profile_filename, stream=statsfile)
-        stats = p.strip_dirs().sort_stats('cumulative')
-        stats.print_stats()
-        statsfile.close()
-        sys.exit(0)
     sys.exit(main())
