@@ -67,6 +67,11 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
     dataset = parse_bag(bag, topic_filter=topic_filter, custom_parsers=cp)
 
     cwg = db_root.rstrip('/') + '/' + bag_path.stem
+    if db.get(cwg, False):
+        warning("A group corresponding to {} already exists."
+                " Only new dataset entries will be added.\n"
+                "Most probably this means that you have two bag files with the same name."
+                .format(bag_path))
 
     for (topic, data) in dataset.items():
         base, t = split_base_and_head(cwg, topic)
