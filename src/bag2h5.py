@@ -18,12 +18,16 @@ import sys
 from pathlib import Path
 import colorlog
 
-from ros2scipy.bag2h5 import folder2h5, bag2h5, checkfolder2h5, checkh5bag
+from ros2scipy.bag2h5 import bag2h5, checkh5bag
 
 __version__ = 0.1
 __date__ = '2015-10-15'
 __updated__ = '2015-10-15'
 
+
+def _collect_folder_bags(folder, recursive=False):
+    pattern = '**/*.bag' if recursive else '*.bag'
+    return Path(folder).glob(pattern)
 
 def main():
 
@@ -66,25 +70,39 @@ def main():
 
         db = args.output
 
+        bags = []
         for f in args.bags:
             f = Path(f)
             if f.is_dir():
-                folder2h5(f, db, **args_dict)
-                checkfolder2h5(f, db, **args_dict)
+                bags.extend(_collect_folder_bags(f, args.recursive))
             elif f.is_file():
-                bag2h5(f, db, **args_dict)
-                checkh5bag(f, db, **args_dict)
+                if f.suffix != '.bag':
+                    logging.warning("File %s doesn't have .bag suffix, skipping it", f)
+                else:
+                    bags.append(f)
             else:
-                logging.warning("Path {} isn't a correct file or folder, skipping it.".format(f))
+                logging.warning("Path %s isn't a correct file or folder, skipping it", f)
+
+        iterbags = iter(bags) # Create iterator to allow tracking the status (see below)
+        for b in iterbags:
+            bag2h5(b, db, **args_dict)
+            checkh5bag(b, db, **args_dict)
         return 0
 
-    except KeyboardInterrupt:
-        logging.error("User interrupted while ...") # TODO: actually gather what we were doing
-        return 1
+    except (Exception, KeyboardInterrupt) as e:
+        notdonebags = list(iterbags)
+        if len(bags) < 2:
+            logging.error("Stopped before completion")
+        else:
+            logging.error("Stopped while converting %s, remaining bags to convert are %s",
+                          b, [str(ndb) for ndb in notdonebags])
 
-    except Exception as e:
-        logging.exception("Internal error")
-        return 2
+        if isinstance(e, KeyboardInterrupt):
+            return 1
+        else:
+            logging.exception("Internal error")
+            return 2
+
 
 if __name__ == "__main__":
     sys.exit(main())

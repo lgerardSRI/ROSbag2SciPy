@@ -3,7 +3,7 @@ Created on Oct 12, 2015
 
 @author: lgerard
 '''
-from logging import error, warning, info, debug
+from logging import warning, info, debug
 import importlib
 
 from pathlib import Path
@@ -32,11 +32,6 @@ def split_base_and_head(root, rel_path):
     rpath = rel_path.strip('/')
     path = root + rpath
     return path.rsplit('/', 1)
-
-
-def _collect_folder_bags(folder, recursive=False):
-    pattern = '**/*.bag' if recursive else '*.bag'
-    return Path(folder).glob(pattern)
 
 
 def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
@@ -87,15 +82,6 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
                 g.create_dataset(t, data=data)
 
 
-def folder2h5(folder, db, recursive=False, **kargs):
-    """
-    Look for all .bag files in folder and call bag2tbl
-    with the rest of the arguments on each one.
-    """
-    for bag in _collect_folder_bags(folder, recursive):
-        bag2h5(bag, db, **kargs)
-
-
 def checkh5bag(bag_path, db_path, db_root='/', topic_filter=set(), **kargs):
     bag_path = Path(bag_path)
     if not bag_path.exists():
@@ -129,17 +115,6 @@ def checkh5bag(bag_path, db_path, db_root='/', topic_filter=set(), **kargs):
             raise ValueError("The dataset {}/{} is incomplete,"
                              "found {} values out of {} required by bag {}."
                              .format(base, t, dlen, topiclen, bag_path))
-
-def checkfolder2h5(folder, db, recursive=False, **kargs):
-    for bag in _collect_folder_bags(folder, recursive):
-        try:
-            checkh5bag(bag, db, **kargs)
-            info("{} is ok.".format(bag))
-        except ValueError as e:
-            error("{} is bad: {}".format(bag, e))
-
-
-
-
+    info("%s is ok.", bag)
 
 
