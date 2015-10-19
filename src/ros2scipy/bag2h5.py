@@ -62,7 +62,7 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
         debug("Raised error while parsing bag %s", bag_path, exc_info=True)
         warning(str(e))
         warning("Skipping bag %s", bag_path)
-        return
+        return 1
 
     # Open the database
     with h5py.File(str(db_path), 'a') as db:
@@ -81,6 +81,8 @@ def bag2h5(bag_path, db_path, db_root='/', topic_filter=None,
             else:
                 g.create_dataset(t, data=data)
 
+    return 0
+
 
 def checkh5bag(bag_path, db_path, db_root='/', topic_filter=set(), **kargs):
     bag_path = Path(bag_path)
@@ -89,7 +91,7 @@ def checkh5bag(bag_path, db_path, db_root='/', topic_filter=set(), **kargs):
 
     db_path = Path(db_path)
     if not db_path.exists():
-        raise ValueError("The file {} doesn't exists.".format(bag_path))
+        raise ValueError("The file {} doesn't exists.".format(db_path))
 
     bag = rosbag.Bag(str(bag_path))
     db = h5py.File(str(db_path))

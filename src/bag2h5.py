@@ -86,7 +86,9 @@ def main():
         iterbags = iter(bags) # Create iterator to allow tracking the status (see below)
         for b in iterbags:
             if not args.check_only:
-                bag2h5(b, db, **args_dict)
+                err = bag2h5(b, db, **args_dict)
+                if err: # No need to check, we know it is not ok.
+                    continue
             checkh5bag(b, db, **args_dict)
         return 0
 
