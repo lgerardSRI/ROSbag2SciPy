@@ -16,9 +16,11 @@ import logging
 import sys
 
 from pathlib import Path
+import bokeh.plotting
 import colorlog
 
 from ros2scipy.bag2h5 import bag2h5, checkh5bag
+
 
 __version__ = 0.1
 __date__ = '2015-10-15'
